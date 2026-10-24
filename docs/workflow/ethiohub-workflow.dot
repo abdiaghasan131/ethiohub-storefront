@@ -1,0 +1,74 @@
+digraph EthioHubWorkflow {
+  graph [
+    label="ETHIOHUB STOREFRONT — HOW IT WORKS\nFrom browsing products to a demo order confirmation",
+    labelloc=t, labeljust=l, fontsize=25, fontname="Arial Bold", fontcolor="#14352f",
+    rankdir=TB, splines=ortho, nodesep=0.38, ranksep=0.56, pad=0.28,
+    bgcolor="#f6f8f7", compound=true, newrank=true
+  ];
+  node [shape=box, style="rounded,filled", fontname="Arial", fontsize=11, margin="0.18,0.12", color="#d7e3df", penwidth=1.2, fillcolor="#ffffff", fontcolor="#203b36"];
+  edge [color="#7b958d", penwidth=1.5, arrowsize=0.75, fontname="Arial", fontsize=9, fontcolor="#526c64"];
+
+  start [shape=oval, label="SHOPPER STARTS", fillcolor="#0e6b5c", color="#0e6b5c", fontcolor="white", fontsize=12, penwidth=1.5];
+  visit [label="Open EthioHub storefront\nResponsive React UI", fillcolor="#e5f3ee", color="#9dcdbd"];
+  api_decision [shape=diamond, label="Products API\nconfigured?", fillcolor="#fff4d9", color="#e5bf62", margin="0.12,0.08"];
+  api [label="Fetch GET /api/products\nParse supported response shape", fillcolor="#eaf2ff", color="#b6c9ef"];
+  normalize [label="Normalize product fields\nFilter inactive products", fillcolor="#eaf2ff", color="#b6c9ef"];
+  fallback [label="Use built-in sample catalog\n(if not configured or request fails)", fillcolor="#fff7e7", color="#e7ca8b"];
+  catalog [label="Render product catalog\nProduct cards · ETB sample prices · stock states", fillcolor="#e5f3ee", color="#9dcdbd"];
+
+  browse [label="Discover products\nSearch · category · price · sale · stock · sorting", fillcolor="#e5f3ee", color="#9dcdbd"];
+  quick [label="Open quick view\nDescription · price · stock · quantity", fillcolor="#e5f3ee", color="#9dcdbd"];
+  variant_decision [shape=diamond, label="Size / colour\nselection needed?", fillcolor="#fff4d9", color="#e5bf62", margin="0.12,0.08"];
+  choose [label="Choose a valid product option\n(e.g. size or colour)", fillcolor="#fff7e7", color="#e7ca8b"];
+  add [label="Add to cart\nCheck availability and selected option", fillcolor="#e5f3ee", color="#9dcdbd"];
+  cartstate [label="Update cart state\nSave cart to browser localStorage", fillcolor="#eaf2ff", color="#b6c9ef"];
+  review [label="Review cart\nChange quantity · remove item · clear cart", fillcolor="#e5f3ee", color="#9dcdbd"];
+  checkout [label="Checkout form\nName · phone · city · delivery address", fillcolor="#e5f3ee", color="#9dcdbd"];
+  validate [shape=diamond, label="Required fields\nvalid?", fillcolor="#fff4d9", color="#e5bf62", margin="0.12,0.08"];
+  payments [label="Choose payment preference\nTelebirr · Chapa · cash on delivery", fillcolor="#eaf2ff", color="#b6c9ef"];
+  demo [label="Create local demo order\nGenerate example order ID", fillcolor="#eaf2ff", color="#b6c9ef"];
+  success [label="Show order confirmation\nClear demo cart · continue shopping", fillcolor="#dff5e8", color="#79bf98", penwidth=1.5];
+  warning [shape=note, label="PROTOTYPE BOUNDARY\nNo real payment is processed.\nNo order or personal data is sent to a server.\nPrices, stock, ratings and delivery fees are illustrative.", fillcolor="#fff4e8", color="#e7a96d", fontcolor="#73451d", fontsize=10];
+
+  wishlist [label="Wishlist\nSave / remove favourites in localStorage", fillcolor="#f2eaff", color="#c7b5ef"];
+  wishlist_view [label="Filter catalog to saved favourites", fillcolor="#f2eaff", color="#c7b5ef"];
+  prod_backend [label="PRODUCTION NEXT STEP\nReact storefront → secure backend order API\nServer validates prices, stock and delivery\nBackend initiates payment and verifies provider callback", fillcolor="#f0f2f1", color="#879891", style="rounded,dashed,filled", fontsize=10];
+
+  subgraph cluster_catalog {
+    label="1  LOAD THE CATALOG"; labelloc=t; labeljust=l; fontsize=13; fontname="Arial Bold"; fontcolor="#2c6d5b";
+    color="#c4ded4"; style="rounded"; penwidth=1.2;
+    visit; api_decision; api; normalize; fallback; catalog;
+  }
+  subgraph cluster_browse {
+    label="2  DISCOVER & SELECT"; labelloc=t; labeljust=l; fontsize=13; fontname="Arial Bold"; fontcolor="#2c6d5b";
+    color="#c4ded4"; style="rounded"; penwidth=1.2;
+    browse; quick; variant_decision; choose; add; wishlist; wishlist_view;
+  }
+  subgraph cluster_purchase {
+    label="3  CART & DEMO CHECKOUT"; labelloc=t; labeljust=l; fontsize=13; fontname="Arial Bold"; fontcolor="#2c6d5b";
+    color="#c4ded4"; style="rounded"; penwidth=1.2;
+    cartstate; review; checkout; validate; payments; demo; success; warning;
+  }
+
+  start -> visit -> api_decision;
+  api_decision -> api [label="Yes"];
+  api -> normalize -> catalog;
+  api_decision -> fallback [label="No"];
+  fallback -> catalog;
+  catalog -> browse -> quick -> variant_decision;
+  variant_decision -> choose [label="Yes"];
+  choose -> add;
+  variant_decision -> add [label="No"];
+  add -> cartstate -> review -> checkout -> validate;
+  validate -> checkout [label="No — fix fields", color="#b7773f", fontcolor="#9b602c", constraint=false];
+  validate -> payments [label="Yes"];
+  payments -> demo -> success;
+  success -> warning [style=dashed, arrowhead=none, color="#b58c68"];
+
+  browse -> wishlist [style=dashed, label="Save favourite", color="#9f87d3", fontcolor="#765ca7", constraint=false];
+  wishlist -> wishlist_view [label="Open wishlist", color="#9f87d3", fontcolor="#765ca7"];
+  wishlist_view -> browse [style=dashed, label="Return to catalog", color="#9f87d3", fontcolor="#765ca7", constraint=false];
+  success -> prod_backend [style=dashed, label="Before launch", color="#7f9089", fontcolor="#64766f"];
+  {rank=same; api; fallback}
+  {rank=same; choose; wishlist}
+}

@@ -1,0 +1,38 @@
+flowchart TD
+    A([Shopper starts]) --> B[Open EthioHub storefront<br/>Responsive React UI]
+    B --> C{Products API<br/>configured?}
+    C -- Yes --> D[GET /api/products]
+    D --> E[Normalize product fields<br/>Filter inactive products]
+    C -- No or request fails --> F[Use built-in sample catalog]
+    E --> G[Render product catalog]
+    F --> G
+    G --> H[Search · category · price · sale · stock · sort]
+    H --> I[Open product quick view]
+    I --> J{Size or colour<br/>selection needed?}
+    J -- Yes --> K[Choose a valid option]
+    K --> L[Add to cart]
+    J -- No --> L
+    L --> M[Update cart state<br/>Persist in localStorage]
+    M --> N[Review cart<br/>Edit quantity or remove items]
+    N --> O[Checkout form<br/>Name · phone · city · address]
+    O --> P{Required fields<br/>valid?}
+    P -- No --> O
+    P -- Yes --> Q[Choose payment preference<br/>Telebirr · Chapa · cash on delivery]
+    Q --> R[Create local demo order]
+    R --> S[Show demo confirmation<br/>Clear demo cart]
+    S -. Prototype: no actual payment or server order .-> T[Production next step<br/>Secure backend validates price, stock and delivery<br/>Initiate payment and verify provider callback]
+    H -. Save / remove favourite .-> W[Wishlist stored in localStorage]
+    W -. Open saved favourites .-> H
+
+    classDef startEnd fill:#0e6b5c,color:#fff,stroke:#0e6b5c,stroke-width:2px;
+    classDef user fill:#e5f3ee,color:#203b36,stroke:#9dcdbd,stroke-width:1.5px;
+    classDef data fill:#eaf2ff,color:#203b36,stroke:#b6c9ef,stroke-width:1.5px;
+    classDef decision fill:#fff4d9,color:#5b4819,stroke:#e5bf62,stroke-width:1.5px;
+    classDef wishlist fill:#f2eaff,color:#49376d,stroke:#c7b5ef,stroke-width:1.5px;
+    classDef production fill:#f0f2f1,color:#203b36,stroke:#879891,stroke-dasharray:5 5;
+    class A,S startEnd;
+    class B,G,H,I,K,L,N,O,Q user;
+    class D,E,F,M,R data;
+    class C,J,P decision;
+    class W wishlist;
+    class T production;
